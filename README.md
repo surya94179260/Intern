@@ -1,4 +1,4 @@
-# Intern
+# Setting up environment and brief intro.
 
 In this project we have developed a transaction system using blockchain technology.
 to start the system you need to perform following operation:
