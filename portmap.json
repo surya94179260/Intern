@@ -1,0 +1,15 @@
+{
+  "ca.apeda.gov.in-0": "7054:7054",
+  "ca.exporters.in-0": "9054:7054",
+  "ca.importers.in-0": "8054:7054",
+  "couch0-0": "5984:5984",
+  "couch1-0": "6984:5984",
+  "couch2-0": "7984:5984",
+  "orderer.xnet.com": "7050:7050",
+  "peer0.apeda.gov.in-0": "7051:7051",
+  "peer0.apeda.gov.in-1": "7053:7053",
+  "peer0.exporters.in-0": "9051:7051",
+  "peer0.exporters.in-1": "9053:7053",
+  "peer0.importers.in-0": "8051:7051",
+  "peer0.importers.in-1": "8053:7053"
+}

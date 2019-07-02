@@ -1,0 +1,176 @@
+
+Organizations:
+    - &OrdererOrg
+            Name: OrdererMSP
+            ID: OrdererMSP
+            MSPDir: crypto-config/ordererOrganizations/xnet.com/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.member')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.member')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.admin')"
+
+    
+    - &APEDAOrg
+            Name: APEDAMSP
+            ID: APEDAMSP
+            MSPDir: crypto-config/peerOrganizations/apeda.gov.in/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('APEDAMSP.admin', 'APEDAMSP.peer', 'APEDAMSP.client' )"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('APEDAMSP.admin', 'APEDAMSP.client' )"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('APEDAMSP.admin')"
+            AnchorPeers:
+              - Host: peer0.apeda.gov.in
+                Port: 7051
+    
+    - &ImportersOrg
+            Name: ImportersMSP
+            ID: ImportersMSP
+            MSPDir: crypto-config/peerOrganizations/importers.in/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('ImportersMSP.admin', 'ImportersMSP.peer', 'ImportersMSP.client' )"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('ImportersMSP.admin', 'ImportersMSP.client' )"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('ImportersMSP.admin')"
+            AnchorPeers:
+              - Host: peer0.importers.in
+                Port: 7051
+    
+    - &ExportersOrg
+            Name: ExportersMSP
+            ID: ExportersMSP
+            MSPDir: crypto-config/peerOrganizations/exporters.in/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('ExportersMSP.admin', 'ExportersMSP.peer', 'ExportersMSP.client' )"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('ExportersMSP.admin', 'ExportersMSP.client' )"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('ExportersMSP.admin')"
+            AnchorPeers:
+              - Host: peer0.exporters.in
+                Port: 7051
+    
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_3: true
+    Orderer: &OrdererCapabilities
+        V1_1: true
+    Application: &ApplicationCapabilities
+        V1_3: true
+        V1_2: false
+        V1_1: false
+
+Application: &ApplicationDefaults
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+          - orderer.xnet.com:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 16
+        AbsoluteMaxBytes: 98 MB
+        PreferredMaxBytes: 1024 KB
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    Capabilities:
+        <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+    OrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities 
+        Consortiums:
+            XConsortium:
+                Organizations:
+                   - *APEDAOrg
+                   - *ImportersOrg
+                   - *ExportersOrg
+                   
+        
+    
+    mangotracechannel:
+        Consortium: XConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+              - *APEDAOrg
+              - *ExportersOrg
+              - *ImportersOrg
+              
+            Capabilities:
+              <<: *ApplicationCapabilities
+    
+        
+

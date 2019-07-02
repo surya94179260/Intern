@@ -1,0 +1,41 @@
+OrdererOrgs:
+- Domain: xnet.com
+  Name: Orderer
+  Specs:
+  - SANS:
+    - localhost
+  - Hostname: orderer
+PeerOrgs:
+- CA:
+    Hostname: ca
+  Domain: apeda.gov.in
+  EnableNodeOUs: true
+  Name: APEDA
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+  Users:
+    Count: 1
+- CA:
+    Hostname: ca
+  Domain: importers.in
+  EnableNodeOUs: true
+  Name: Importers
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+  Users:
+    Count: 1
+- CA:
+    Hostname: ca
+  Domain: exporters.in
+  EnableNodeOUs: true
+  Name: Exporters
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+  Users:
+    Count: 1

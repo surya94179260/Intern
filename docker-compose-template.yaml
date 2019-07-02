@@ -1,0 +1,233 @@
+version: "2"
+networks:
+  fabricnetwork: {}
+services:
+  ca.apeda.gov.in:
+    container_name: ca.apeda.gov.in
+    extends:
+      file: base.yaml
+      service: ca
+    environment:
+    - FABRIC_CA_SERVER_CA_NAME=APEDACA
+    - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.apeda.gov.in-cert.pem
+    - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/APEDA_PRIVATE_KEY
+    - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.apeda.gov.in-cert.pem
+    - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/APEDA_PRIVATE_KEY
+    working_dir: /opt/ws
+    volumes:
+    - ./crypto-config/peerOrganizations/apeda.gov.in/ca/:/etc/hyperledger/fabric-ca-server-config
+    - ./:/opt/ws
+    ports:
+    - 7054:7054
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  ca.exporters.in:
+    container_name: ca.exporters.in
+    extends:
+      file: base.yaml
+      service: ca
+    environment:
+    - FABRIC_CA_SERVER_CA_NAME=ExportersCA
+    - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.exporters.in-cert.pem
+    - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/EXPORTERS_PRIVATE_KEY
+    - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.exporters.in-cert.pem
+    - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/EXPORTERS_PRIVATE_KEY
+    working_dir: /opt/ws
+    volumes:
+    - ./crypto-config/peerOrganizations/exporters.in/ca/:/etc/hyperledger/fabric-ca-server-config
+    - ./:/opt/ws
+    ports:
+    - 9054:7054
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  ca.importers.in:
+    container_name: ca.importers.in
+    extends:
+      file: base.yaml
+      service: ca
+    environment:
+    - FABRIC_CA_SERVER_CA_NAME=ImportersCA
+    - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.importers.in-cert.pem
+    - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/IMPORTERS_PRIVATE_KEY
+    - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.importers.in-cert.pem
+    - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/IMPORTERS_PRIVATE_KEY
+    working_dir: /opt/ws
+    volumes:
+    - ./crypto-config/peerOrganizations/importers.in/ca/:/etc/hyperledger/fabric-ca-server-config
+    - ./:/opt/ws
+    ports:
+    - 8054:7054
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  cli:
+    image: hyperledger/fabric-tools:${TOOLS_TAG}
+    container_name: cli
+    tty: true
+    environment:
+    - CORE_PEER_TLS_ENABLED=true
+    - GOPATH=/opt/gopath
+    - CORE_LOGGING_LEVEL=DEBUG
+    - CORE_PEER_ID=cli
+    - GODEBUG=netdns=go
+    working_dir: /opt/ws
+    volumes:
+    - /var/run/:/host/var/run/
+    - ./:/opt/ws
+    - ./chaincode/github.com:/opt/gopath/src/github.com
+    depends_on:
+    - orderer.xnet.com
+    - peer0.apeda.gov.in
+    - peer0.importers.in
+    - peer0.exporters.in
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  couch0:
+    container_name: couch0
+    extends:
+      file: base.yaml
+      service: couchdb
+    ports:
+    - 5984:5984
+    networks:
+    - fabricnetwork
+  couch1:
+    container_name: couch1
+    extends:
+      file: base.yaml
+      service: couchdb
+    ports:
+    - 6984:5984
+    networks:
+    - fabricnetwork
+  couch2:
+    container_name: couch2
+    extends:
+      file: base.yaml
+      service: couchdb
+    ports:
+    - 7984:5984
+    networks:
+    - fabricnetwork
+  orderer.xnet.com:
+    container_name: orderer.xnet.com
+    extends:
+      file: base.yaml
+      service: orderer
+    volumes:
+    - ./genesis.block:/var/hyperledger/orderer/genesis.block
+    - ./crypto-config/ordererOrganizations/xnet.com/orderers/orderer.xnet.com/msp:/var/hyperledger/orderer/msp
+    - ./crypto-config/ordererOrganizations/xnet.com/orderers/orderer.xnet.com/tls/:/var/hyperledger/orderer/tls
+    ports:
+    - 7050:7050
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  peer0.apeda.gov.in:
+    container_name: peer0.apeda.gov.in
+    extends:
+      file: base.yaml
+      service: peer
+    environment:
+    - CORE_PEER_ID=peer0.apeda.gov.in
+    - CORE_PEER_ADDRESS=peer0.apeda.gov.in:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0.apeda.gov.in:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.apeda.gov.in:7051
+    - CORE_PEER_LOCALMSPID=APEDAMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch0:5984
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.apeda.gov.in:7051
+    volumes:
+    - /var/run/:/host/var/run/
+    - ./crypto-config/peerOrganizations/apeda.gov.in/peers/peer0.apeda.gov.in/msp:/etc/hyperledger/fabric/msp
+    - ./crypto-config/peerOrganizations/apeda.gov.in/peers/peer0.apeda.gov.in/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 7051:7051
+    - 7053:7053
+    depends_on:
+    - couch0
+    - orderer.xnet.com
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  peer0.exporters.in:
+    container_name: peer0.exporters.in
+    extends:
+      file: base.yaml
+      service: peer
+    environment:
+    - CORE_PEER_ID=peer0.exporters.in
+    - CORE_PEER_ADDRESS=peer0.exporters.in:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0.exporters.in:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.exporters.in:7051
+    - CORE_PEER_LOCALMSPID=ExportersMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch2:5984
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.exporters.in:7051
+    volumes:
+    - /var/run/:/host/var/run/
+    - ./crypto-config/peerOrganizations/exporters.in/peers/peer0.exporters.in/msp:/etc/hyperledger/fabric/msp
+    - ./crypto-config/peerOrganizations/exporters.in/peers/peer0.exporters.in/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 9051:7051
+    - 9053:7053
+    depends_on:
+    - couch2
+    - orderer.xnet.com
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1
+  peer0.importers.in:
+    container_name: peer0.importers.in
+    extends:
+      file: base.yaml
+      service: peer
+    environment:
+    - CORE_PEER_ID=peer0.importers.in
+    - CORE_PEER_ADDRESS=peer0.importers.in:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0.importers.in:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.importers.in:7051
+    - CORE_PEER_LOCALMSPID=ImportersMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch1:5984
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.importers.in:7051
+    volumes:
+    - /var/run/:/host/var/run/
+    - ./crypto-config/peerOrganizations/importers.in/peers/peer0.importers.in/msp:/etc/hyperledger/fabric/msp
+    - ./crypto-config/peerOrganizations/importers.in/peers/peer0.importers.in/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 8051:7051
+    - 8053:7053
+    depends_on:
+    - couch1
+    - orderer.xnet.com
+    networks:
+    - fabricnetwork
+    extra_hosts:
+    - server0.example.com:127.0.0.1
+    - server1.example.com:127.0.0.1
+    - server2.example.com:127.0.0.1

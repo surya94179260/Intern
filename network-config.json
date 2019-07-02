@@ -1,0 +1,64 @@
+{
+  "orderers": {
+    "name": "Orderer",
+    "mspID": "OrdererMSP",
+    "domain": "xnet.com",
+    "ordererHostname": "orderer",
+    "SANS": "localhost",
+    "type": "solo"
+  },
+  "addCA": "true",
+  "fabricVersion": "1.4.0",
+  "orgs": [
+    {
+      "name": "APEDA",
+      "domain": "apeda.gov.in",
+      "mspID": "APEDAMSP",
+      "SANS": "localhost",
+      "peerCount": 1,
+      "userCount": 1
+    },
+    {
+      "name": "Importers",
+      "domain": "importers.in",
+      "mspID": "ImportersMSP",
+      "SANS": "localhost",
+      "peerCount": 1,
+      "userCount": 1
+    },
+    {
+      "name": "Exporters",
+      "domain": "exporters.in",
+      "mspID": "ExportersMSP",
+      "SANS": "localhost",
+      "peerCount": 1,
+      "userCount": 1
+    }
+  ],
+  "consortium": "XConsortium",
+  "channels": [
+    {
+      "channelName": "mangotracechannel",
+      "orgs": [
+        "APEDA",
+        "Exporters",
+        "Importers"
+      ]
+    }
+
+  ],
+  "chaincodes": [
+    {
+      "channelName": "mangotracechannel",
+      "ccid": "recordkeeper",
+      "version": "1.0",
+      "src": "github.com/recordkeeper",
+      "participants": [
+         "APEDA",
+         "Exporters",
+         "Importers"
+      ]
+    }
+
+  ]
+}
